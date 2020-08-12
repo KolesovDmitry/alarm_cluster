@@ -36,8 +36,6 @@ class MapcalcPerceptron:
         expr = '1.0 / (1 + exp(-(%s)))' % (node, )
         return expr
 
-
-
     def _layer(self, x, w, b, activation, out_names=[]):
         """Return sum(xi * wi) + b
 

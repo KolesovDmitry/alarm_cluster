@@ -208,13 +208,17 @@ def main(input, output, outdir, grass_params):
 
     try:
         r.external(input=input, output=in_rast)
-        # import ipdb; ipdb.set_trace()
 
-        r.external_out(directory=outdir, format="GTiff")
         g.region(raster=band_name(in_rast, 'B1'))
         bands = ["B1", "B2", "B4", "B5", "B8", "B8A", "B9", "B10", "B11", "B12"]
         bands = [band_name(in_rast, b) for b in bands]
-        detector.make_cloud(bands, [out_rast])
+
+        # Rescale bands to [0, 1]
+        scaled = [tempname() for _ in bands]
+        for t, b in zip(scaled, bands):
+            r.mapcalc(expression='%s = %s / 10000.0' % (t, b))
+
+        detector.make_cloud(scaled, [out_rast])
 
         r.out_gdal(input=out_rast, output=output, createopt='COMPRESS=DEFLATE')
     finally:
