@@ -18,7 +18,7 @@ RUN mkdir -p /opt/raster_processor
 
 RUN grass -c EPSG:4326 /opt/GRASSDATA/LatLon
 
-# COPY raster_processor/* /opt/raster_processor
+COPY raster_processor/* /opt/raster_processor/
 
 
 
