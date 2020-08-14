@@ -1,0 +1,4 @@
+MAPSET = 'PERMANENT'
+LOCATION = 'LatLon'
+DATA = '/opt/GRASSDATA/'
+
