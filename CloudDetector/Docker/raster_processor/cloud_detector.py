@@ -1,5 +1,5 @@
 import argparse
-import uuid
+import os
 
 from grass_session import Session
 from grass.script import core as gcore
@@ -7,9 +7,8 @@ from grass.pygrass.modules.shortcuts import general as g
 from grass.pygrass.modules.shortcuts import raster as r
 
 from mapcalc_nnet import MapcalcPerceptron
+from utils import uniq_name
 
-def tempname(prefix='tmp_'):
-    return prefix + uuid.uuid4().hex
 
 def band_name(raster, band):
     bands = {
@@ -199,11 +198,12 @@ class CloudDetector:
 
 
 def main(input, output, outdir, grass_params):
+    out_file = os.path.join(outdir, output)
     PERMANENT = Session()
     PERMANENT.open(gisdb=grass_params[0], location=grass_params[1], mapset=grass_params[2])
 
-    in_rast = tempname()
-    out_rast = tempname()
+    in_rast = uniq_name()
+    out_rast = uniq_name()
     detector = CloudDetector()
 
     try:
@@ -214,13 +214,13 @@ def main(input, output, outdir, grass_params):
         bands = [band_name(in_rast, b) for b in bands]
 
         # Rescale bands to [0, 1]
-        scaled = [tempname() for _ in bands]
+        scaled = [uniq_name() for _ in bands]
         for t, b in zip(scaled, bands):
             r.mapcalc(expression='%s = %s / 10000.0' % (t, b))
 
         detector.make_cloud(scaled, [out_rast])
 
-        r.out_gdal(input=out_rast, output=output, createopt='COMPRESS=DEFLATE')
+        r.out_gdal(input=out_rast, output=out_file, createopt='COMPRESS=DEFLATE')
     finally:
         g.remove(type='raster', pattern='%s*' % (in_rast), flags='f')
         g.remove(type='raster', name=output, flags='f')
@@ -231,17 +231,19 @@ def main(input, output, outdir, grass_params):
 
 
 if __name__ == "__main__":
+    from config import DATA, LOCATION, MAPSET
+
     parser = argparse.ArgumentParser(description='Detect clouds.')
     parser.add_argument('input', help='Sentinel-2 image')
     parser.add_argument('outfile', help='Name of output raster with pobabilities (percents)')
     parser.add_argument('outdir', help='Name of output directory for rasters')
-    parser.add_argument('grassdata', help='GRASSDATA directory (e.g. /opt/GRASSDATA)')
-    parser.add_argument('location', help='LOCATION directory (e.g. LatLon)')
-    parser.add_argument('mapset', help='MAPSET directory (e.g. PERMANENT)')
+    # parser.add_argument('grassdata', help='GRASSDATA directory (e.g. /opt/GRASSDATA)')
+    # parser.add_argument('location', help='LOCATION directory (e.g. LatLon)')
+    # parser.add_argument('mapset', help='MAPSET directory (e.g. PERMANENT)')
 
     args = parser.parse_args()
     input = args.input
     outdir = args.outdir
     outfile = args.outfile
-    main(input, outfile, outdir, (args.grassdata, args.location, args.mapset))
+    main(input, outfile, outdir, (DATA, LOCATION, MAPSET))
 

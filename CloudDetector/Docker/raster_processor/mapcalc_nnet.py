@@ -1,12 +1,6 @@
 from itertools import chain
-import uuid
 
-
-
-def uniq_name(prefix='nd_'):
-    return prefix + uuid.uuid4().hex
-
-
+from utils import uniq_name
 
 class MapcalcPerceptron:
     def __init__(self, ww, bb):
@@ -53,7 +47,6 @@ class MapcalcPerceptron:
         y = []
         for wi, bi, node in zip(w, b, out_names):
             assert len(x) == len(wi)
-            # node = uniq_name()
             s = []
             for xk, wk in zip(x, wi):
                 s.append("(%s)*(%s)" % (xk, wk))
