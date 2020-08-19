@@ -224,6 +224,8 @@ def main(input, output, outdir, grass_params):
     finally:
         g.remove(type='raster', pattern='%s*' % (in_rast), flags='f')
         g.remove(type='raster', name=output, flags='f')
+        for t in scaled:
+            g.remove(type='raster', name=t, flags='f')
     
 
     PERMANENT.close()

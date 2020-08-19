@@ -8,3 +8,5 @@
   mkdir tiles
   gdal_retile.py -ps 1024 1024 -tileIndex Index.shp -targetDir tiles *.tif
   
+3. for IMG in $(python TMP/manager.py /opt/DATA/Index.shp /opt/DATA/TestAOI.geojson 2> /dev/null); do python TMP/cloud_detector.py /opt/DATA/$IMG cloud_$IMG /opt/DATA/CLOUD; done
+
